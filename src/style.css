@@ -52,3 +52,40 @@ html, body {
   position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
+
+/* ---------- branding (top-left) ---------- */
+#brand {
+  position: absolute; top: 5.5vh; left: 4vw; z-index: 5;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 14px;
+  transition: opacity .25s steps(4);
+}
+body[data-state='running'] #brand { opacity: .3; } /* stays out of the way while you play */
+#brand:hover, #brand:focus-within { opacity: 1; }
+.brand-name { font-size: clamp(10px, 1.5vw, 14px); letter-spacing: .12em; line-height: 1.4; color: var(--fg); }
+.brand-name small { display: block; margin-top: 6px; font-size: .68em; letter-spacing: .1em; color: var(--dim); }
+
+.gh-btn {
+  display: inline-flex; align-items: center; gap: 10px; padding: 9px 13px;
+  font: inherit; font-size: clamp(8px, 1.1vw, 11px); letter-spacing: .08em; text-decoration: none;
+  color: var(--fg); background: var(--bg);
+  /* pixel border with notched corners */
+  box-shadow: 0 -3px 0 0 var(--fg), 0 3px 0 0 var(--fg), -3px 0 0 0 var(--fg), 3px 0 0 0 var(--fg);
+  filter: drop-shadow(4px 4px 0 var(--dim));
+  transition: transform .12s steps(2), filter .12s steps(2), background .12s steps(1), color .12s steps(1);
+}
+.gh-btn:hover, .gh-btn:focus-visible {
+  transform: translate(-2px, -2px); filter: drop-shadow(6px 6px 0 var(--dim));
+  background: var(--fg); color: var(--bg); outline: none;
+}
+.gh-btn:active { transform: translate(3px, 3px); filter: drop-shadow(0 0 0 var(--dim)); }
+.gh-star { width: 18px; height: 18px; shape-rendering: crispEdges; }
+.gh-btn:hover .gh-star, .gh-btn:focus-visible .gh-star { animation: hop .45s steps(2) infinite alternate; }
+@keyframes hop { to { transform: translateY(-3px); } }
+.label { display: grid; }
+.label span { grid-area: 1 / 1; }
+.t-b { visibility: hidden; }
+.gh-btn:hover .t-a, .gh-btn:focus-visible .t-a { visibility: hidden; }
+.gh-btn:hover .t-b, .gh-btn:focus-visible .t-b { visibility: visible; }
+
+@media (max-width: 600px) { .brand-name { display: none; } #brand { top: 4vh; } }
+@media (prefers-reduced-motion: reduce) { .gh-btn, .gh-btn * { animation: none !important; transition: none !important; } }

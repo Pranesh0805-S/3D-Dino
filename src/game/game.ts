@@ -68,6 +68,7 @@ export class Game {
     this.input.onJumpRelease = () => this.player.releaseJump();
 
     try { this.hi = parseInt(localStorage.getItem(CFG.hiKey) ?? '0', 10) || 0; } catch { /* private mode */ }
+    document.body.dataset.state = 'idle';
     this.buildRestartIcon();
     this.reset();
     this.theme.applyCss();
@@ -82,6 +83,11 @@ export class Game {
   }
 
   // ---------------- state ----------------
+  private setState(s: State) {
+    this.state = s;
+    document.body.dataset.state = s;
+  }
+
   private reset() {
     this.world.reset();
     this.player.reset();
@@ -99,7 +105,7 @@ export class Game {
       this.begin();
       this.player.requestJump();
     } else if (this.state === 'paused') {
-      this.state = 'running';
+      this.setState('running');
       this.last = performance.now();
       this.el.hint.classList.add('hidden');
     } else if (this.state === 'running') {
@@ -111,19 +117,19 @@ export class Game {
   }
 
   private begin() {
-    this.state = 'running';
+    this.setState('running');
     this.speed = CFG.speed0;
     this.el.hint.classList.add('hidden');
   }
 
   private pause() {
-    this.state = 'paused';
+    this.setState('paused');
     this.el.hintTitle.textContent = 'PAUSED - PRESS SPACE';
     this.el.hint.classList.remove('hidden');
   }
 
   private die() {
-    this.state = 'dead';
+    this.setState('dead');
     this.deadT = 0;
     this.player.dead = true;
     this.sfx.die();

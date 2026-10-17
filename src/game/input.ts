@@ -46,7 +46,7 @@ export class Input {
       for (const ev of ['pointerup', 'pointercancel', 'pointerleave'] as const) b.addEventListener(ev, () => set(false));
     });
     app.addEventListener('pointerdown', (e) => {
-      if ((e.target as HTMLElement).closest('#touch')) return;
+      if ((e.target as HTMLElement).closest('#touch, #brand')) return;
       this.pressJump();
     });
     app.addEventListener('pointerup', () => this.releaseJump());
