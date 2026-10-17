@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://3-d-dino.vercel.app/sitemap.xml

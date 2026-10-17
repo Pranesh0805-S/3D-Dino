@@ -46,3 +46,9 @@ html, body {
 }
 #touch button:active { background: rgba(172,172,172,.35); }
 @media (pointer: coarse) { #touch { display: flex; } }
+
+/* readable by search engines and screen readers, not painted over the game */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}

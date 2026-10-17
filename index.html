@@ -3,12 +3,73 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="description" content="A third-person 3D take on the Chrome dino game." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>Dino 3D</title>
+    <title>3D Dino - Play the 3D Chrome Dinosaur Game Online (Free)</title>
+    <meta name="description" content="Play 3D Dino free in your browser: the Chrome dinosaur game as a third-person 3D platformer. Jump gaps, dodge cacti and pterodactyls, beat your high score." />
+    <meta name="keywords" content="3d dino, 3d dinosaur game, 3d chrome dinosaur game, chrome dino 3d, 3d t-rex runner, dino game 3d, chrome dinosaur game 3d, free browser game" />
+    <meta name="author" content="Pranesh S" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#202124" />
+    <link rel="canonical" href="https://3-d-dino.vercel.app/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="3D Dino" />
+    <meta property="og:title" content="3D Dino - the Chrome Dinosaur Game in 3D" />
+    <meta property="og:description" content="Third-person 3D platformer take on the Chrome dino game. Free, no download, plays in your browser." />
+    <meta property="og:url" content="https://3-d-dino.vercel.app/" />
+    <meta property="og:image" content="https://3-d-dino.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="3D Dino gameplay: a pixel dinosaur running on a 3D track at night" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="3D Dino - the Chrome Dinosaur Game in 3D" />
+    <meta name="twitter:description" content="Third-person 3D platformer take on the Chrome dino game. Free, plays in your browser." />
+    <meta name="twitter:image" content="https://3-d-dino.vercel.app/og-image.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "3D Dino",
+        "alternateName": ["3D Dinosaur Game", "3D Chrome Dinosaur Game"],
+        "description": "A free third-person 3D platformer inspired by the Chrome dinosaur game. Run, jump gaps, dodge cacti and pterodactyls, and chase your high score.",
+        "url": "https://3-d-dino.vercel.app/",
+        "image": "https://3-d-dino.vercel.app/og-image.png",
+        "genre": ["Platformer", "Endless runner"],
+        "gamePlatform": "Web browser",
+        "applicationCategory": "Game",
+        "operatingSystem": "Any",
+        "playMode": "SinglePlayer",
+        "inLanguage": "en",
+        "author": { "@type": "Person", "name": "Pranesh S", "url": "https://github.com/Pranesh0805-S" },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
   </head>
   <body>
     <div id="app">
+      <main class="sr-only">
+        <h1>3D Dino: the Chrome Dinosaur Game in 3D</h1>
+        <p>
+          3D Dino is a free browser game that turns the classic Chrome dinosaur (T-Rex) game into a
+          third-person 3D platformer. Run down an endless track, jump over gaps, dodge cacti and
+          pterodactyls, and beat your high score. No download or sign-up needed.
+        </p>
+        <h2>How to play the 3D dinosaur game</h2>
+        <ul>
+          <li>Press Space or the Up arrow to jump. Hold it to jump higher.</li>
+          <li>Press the Down arrow to duck under pterodactyls.</li>
+          <li>Use the Left and Right arrows (or A and D) to move sideways.</li>
+          <li>On a phone, use the on-screen buttons or tap to jump.</li>
+        </ul>
+        <h2>Features</h2>
+        <p>
+          Pixel-art voxel graphics, a day and night cycle every 700 points, speed that keeps rising,
+          gaps in the track, and a high score saved in your browser.
+        </p>
+        <noscript>3D Dino needs JavaScript and WebGL. Please enable JavaScript to play.</noscript>
+      </main>
+
       <canvas id="game"></canvas>
 
       <div id="hud">
