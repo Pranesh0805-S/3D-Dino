@@ -11,16 +11,18 @@ export class Input {
   onJumpPress: () => void = () => {};
   onJumpRelease: () => void = () => {};
   onMode: () => void = () => {};
+  onPause: () => void = () => {};
 
   constructor(app: HTMLElement) {
     addEventListener('keydown', (e) => {
       const c = e.code;
       // let buttons and links keep their normal Enter / Space behaviour
-      if ((c === 'Enter' || c === 'Space') && (e.target as HTMLElement).closest?.('#gameover a, #gameover button, #brand a, #brand button')) return;
+      if ((c === 'Enter' || c === 'Space') && (e.target as HTMLElement).closest?.('#gameover a, #gameover button, #brand a, #brand button, #tools button')) return;
       if (JUMP.has(c) || c === 'Enter') {
         e.preventDefault();
         if (!e.repeat) this.pressJump();
       } else if (c === 'KeyM') { if (!e.repeat) this.onMode(); }
+      else if (c === 'KeyP' || c === 'Escape') { e.preventDefault(); if (!e.repeat) this.onPause(); }
       else if (DOWN.has(c)) { e.preventDefault(); this.down = true; }
       else if (LEFT.has(c)) { e.preventDefault(); this.left = true; }
       else if (RIGHT.has(c)) { e.preventDefault(); this.right = true; }
@@ -50,7 +52,7 @@ export class Input {
       for (const ev of ['pointerup', 'pointercancel', 'pointerleave'] as const) b.addEventListener(ev, () => set(false));
     });
     app.addEventListener('pointerdown', (e) => {
-      if ((e.target as HTMLElement).closest('#touch, #brand, #gameover a, #gameover button')) return;
+      if ((e.target as HTMLElement).closest('#touch, #brand, #tools, #gameover a, #gameover button')) return;
       this.pressJump();
     });
     app.addEventListener('pointerup', () => this.releaseJump());

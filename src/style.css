@@ -21,7 +21,7 @@ html, body {
   letter-spacing: 0.05em; color: var(--fg); text-shadow: 0 0 0 currentColor;
 }
 #hi { color: var(--dim); }
-#hi.hidden { visibility: hidden; }
+#hi.hidden { display: none; }
 #score.flash { visibility: hidden; }
 #overlay {
   position: absolute; inset: 0; pointer-events: none;
@@ -92,13 +92,13 @@ body[data-state='running'] #brand { opacity: .3; } /* stays out of the way while
 
 /* ---------- game-over actions ---------- */
 .gh-btn { border: 0; cursor: pointer; }
-.go-actions { margin-top: 26px; pointer-events: auto; }
+.go-actions { position: fixed; left: 0; right: 0; bottom: 10vh; display: flex; justify-content: center; pointer-events: auto; }
 .go-actions .gh-btn { padding: 11px 16px; }
 .go-credit {
   position: fixed; left: 0; right: 0; bottom: 4vh; margin: 0; text-align: center;
   font-size: clamp(8px, 1.1vw, 10px); letter-spacing: .1em; color: var(--dim);
 }
-@media (pointer: coarse) { .go-credit { bottom: calc(68px + 9vh); } }
+@media (pointer: coarse) { .go-credit { bottom: calc(68px + 9vh); } .go-actions { bottom: calc(68px + 15vh); } }
 .go-credit a { color: var(--fg); text-decoration: none; border-bottom: 2px solid var(--dim); pointer-events: auto; }
 .go-credit a:hover, .go-credit a:focus-visible { color: var(--bg); background: var(--fg); border-bottom-color: var(--fg); outline: none; }
 
@@ -114,3 +114,13 @@ body[data-state='running'] #brand { opacity: .3; } /* stays out of the way while
 #mode { padding: 9px 12px; font-size: 10px; }
 body[data-mode='hard'] #mode { color: var(--bg); background: var(--fg); }
 body[data-state='running'] #mode, body[data-state='paused'] #mode { display: none; }
+
+/* ---------- tools (pause / sound) and new-hi ---------- */
+#tools { position: absolute; top: calc(6vh + 3.2em); right: 4vw; display: flex; gap: 12px; z-index: 5; font-size: clamp(12px, 2.4vw, 22px); }
+#tools .gh-btn { padding: 7px 10px; font-size: clamp(7px, 1vw, 9px); }
+#pausebtn { display: none; }
+body[data-state='running'] #pausebtn { display: inline-flex; }
+body[data-state='running'] #tools { opacity: .45; }
+#tools:hover, #tools:focus-within { opacity: 1; }
+#newhi { margin: -.6em 0 1em; font-size: clamp(10px, 1.8vw, 16px); letter-spacing: .2em; animation: blink .8s steps(1) infinite; }
+#newhi[hidden] { display: none; }

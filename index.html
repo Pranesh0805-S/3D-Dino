@@ -62,6 +62,7 @@
           <li>Press the Down arrow to duck under pterodactyls.</li>
           <li>Use the Left and Right arrows (or A and D) to move sideways.</li>
           <li>On a phone, use the on-screen buttons or tap to jump.</li>
+          <li>Press P or Escape to pause. Use the sound button to mute.</li>
           <li>Press M or the mode button to switch between Easy and Hard mode.</li>
         </ul>
         <h2>Features</h2>
@@ -86,6 +87,11 @@
         <span id="score">00000</span>
       </div>
 
+      <div id="tools">
+        <button id="pausebtn" class="gh-btn" type="button" aria-label="Pause">PAUSE</button>
+        <button id="snd" class="gh-btn" type="button" aria-label="Toggle sound">SOUND: ON</button>
+      </div>
+
       <div id="callout" role="status" aria-live="polite"></div>
 
       <nav id="brand" aria-label="Project links">
@@ -106,6 +112,7 @@
       <div id="overlay">
         <div id="gameover" hidden>
           <div class="go-title">GAME OVER</div>
+          <div id="newhi" hidden>NEW HI!</div>
           <div id="restart-icon"></div>
           <div class="go-actions">
             <button id="share" class="gh-btn" type="button">SHARE SCORE</button>
@@ -118,6 +125,7 @@
         <div id="hint">
           <p class="blink">PRESS SPACE TO START</p>
           <p class="keys">SPACE JUMP &nbsp; DOWN DUCK &nbsp; ARROWS / A D MOVE</p>
+          <p class="keys">P PAUSE</p>
           <p class="keys" id="mode-hint">PRESS M FOR HARD MODE</p>
         </div>
       </div>

@@ -32,6 +32,7 @@
 - ⚡ **Keeps accelerating** like the original, with variable-height jumps, duck and fast-fall
 - 🏆 **Current score + HI score** (`HI 01415  00018`), saved in the browser; the score flashes every 100 points
 - 🔊 **Retro beeps** generated with WebAudio — no audio files
+- 🥇 **"NEW HI!"** callout the moment you pass your best, and again on the game-over screen
 - 📱 **Touch controls** appear automatically on phones
 
 ## 🎮 Controls
@@ -43,6 +44,8 @@
 | Move sideways | `←` `→` · `A` `D` | ◀ ▶ |
 | Start / restart | `Space` · `Enter` | tap |
 | Switch Easy / Hard (between runs) | `M` | `MODE` button (top left) |
+| Pause | `P` · `Esc` | `PAUSE` button |
+| Sound on / off | — | `SOUND` button |
 
 
 ## 🧠 Game modes & the rule engine

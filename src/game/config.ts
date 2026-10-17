@@ -33,6 +33,7 @@ export const CFG = {
 
   hiKey: 'dino3d:hi',
   modeKey: 'dino3d:mode',
+  muteKey: 'dino3d:mute',
   tunnelY: 1.45, // underside of a duck-zone ceiling (a ducked dino is ~1.4 tall, standing is 2.3)
   siteUrl: 'https://3-d-dino.vercel.app/',
   repoUrl: 'https://github.com/Pranesh0805-S/3D-Dino',

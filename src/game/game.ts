@@ -34,6 +34,8 @@ export class Game {
   hi = 0;
   private lastMilestone = 0;
   private calloutT = 0;
+  private runBest = 0; // HI when this run started
+  private hiShown = false;
   private flashT = 0;
   private deadT = 0;
   private lastTxt = '';
@@ -44,7 +46,7 @@ export class Game {
     score: $('score'), hi: $('hi'), hint: $('hint'), over: $('gameover'),
     hintTitle: document.querySelector('#hint .blink') as HTMLElement,
     share: $('share'), mode: $('mode'), tag: $('tag'), callout: $('callout'),
-    modeHint: $('mode-hint'),
+    modeHint: $('mode-hint'), snd: $('snd'), pauseBtn: $('pausebtn'), newHi: $('newhi'),
   };
 
   constructor(canvas: HTMLCanvasElement, app: HTMLElement) {
@@ -72,6 +74,11 @@ export class Game {
     this.input.onJumpPress = () => this.onPress();
     this.input.onJumpRelease = () => this.player.releaseJump();
     this.input.onMode = () => this.toggleMode();
+    this.input.onPause = () => this.pause();
+    this.el.pauseBtn.addEventListener('click', () => { this.pause(); this.el.pauseBtn.blur(); });
+    this.el.snd.addEventListener('click', () => { this.toggleSound(); this.el.snd.blur(); });
+    try { this.sfx.muted = localStorage.getItem(CFG.muteKey) === '1'; } catch { /* private mode */ }
+    this.syncSoundUi();
     this.rules.onEvent = (m) => this.callout(m);
     this.el.mode.addEventListener('click', () => { this.toggleMode(); this.el.mode.blur(); });
 
@@ -105,8 +112,8 @@ export class Game {
     this.player.reset();
     this.speed = 0; this.dist = 0; this.time = 0; this.score = 0;
     this.lastMilestone = 0; this.flashT = 0; this.deadT = 0; this.calloutT = 0;
-    this.rules.reset();
     this.el.callout.textContent = '';
+    this.el.newHi.hidden = true;
     this.theme.setNight(true);
     this.el.over.hidden = true;
     this.el.hintTitle.textContent = 'PRESS SPACE TO START';
@@ -133,10 +140,13 @@ export class Game {
   private begin() {
     this.setState('running');
     this.speed = this.rules.startSpeed();
+    this.runBest = this.hi;
+    this.hiShown = false;
     this.el.hint.classList.add('hidden');
   }
 
   private pause() {
+    if (this.state !== 'running') return;
     this.setState('paused');
     this.el.hintTitle.textContent = 'PAUSED - PRESS SPACE';
     this.el.hint.classList.remove('hidden');
@@ -147,6 +157,7 @@ export class Game {
     this.deadT = 0;
     this.player.dead = true;
     this.sfx.die();
+    this.el.newHi.hidden = !(this.score > this.runBest && this.score > 0);
     if (this.score > this.hi) {
       this.hi = this.score;
       try { localStorage.setItem(hiKeyFor(this.rules.mode), String(this.hi)); } catch { /* ignore */ }
@@ -183,6 +194,11 @@ export class Game {
         this.sfx.point();
         this.flashT = 0.65;
       }
+      if (this.runBest > 0 && !this.hiShown && this.score > this.runBest) {
+        this.hiShown = true;
+        this.sfx.point();
+        this.callout('NEW HI!');
+      }
       this.theme.setNight(Math.floor(this.score / CFG.nightEvery) % 2 === 0);
 
       this.world.update(dt, this.speed, this.score);
@@ -205,6 +221,19 @@ export class Game {
     this.updateCamera(dt);
     this.updateHud(false, dt);
     if (this.calloutT > 0 && (this.calloutT -= dt) <= 0) this.el.callout.textContent = '';
+  }
+
+  // ---------------- sound ----------------
+  private toggleSound() {
+    this.sfx.muted = !this.sfx.muted;
+    try { localStorage.setItem(CFG.muteKey, this.sfx.muted ? '1' : '0'); } catch { /* ignore */ }
+    this.syncSoundUi();
+    this.sfx.unlock();
+    this.sfx.point();
+  }
+
+  private syncSoundUi() {
+    this.el.snd.textContent = this.sfx.muted ? 'SOUND: OFF' : 'SOUND: ON';
   }
 
   // ---------------- mode ----------------

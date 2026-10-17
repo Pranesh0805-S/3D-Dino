@@ -1,6 +1,7 @@
 // Tiny WebAudio sfx so we don't ship any audio files.
 export class Sfx {
   private ctx?: AudioContext;
+  muted = false;
 
   /** call from a user gesture */
   unlock() {
@@ -13,7 +14,7 @@ export class Sfx {
 
   private tone(f0: number, f1: number, dur: number, vol: number, type: OscillatorType = 'square', delay = 0) {
     const c = this.ctx;
-    if (!c) return;
+    if (!c || this.muted) return;
     const t = c.currentTime + delay;
     const o = c.createOscillator();
     const g = c.createGain();
