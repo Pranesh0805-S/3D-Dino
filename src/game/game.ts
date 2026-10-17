@@ -40,6 +40,7 @@ export class Game {
   private el = {
     score: $('score'), hi: $('hi'), hint: $('hint'), over: $('gameover'),
     hintTitle: document.querySelector('#hint .blink') as HTMLElement,
+    share: $('share'),
   };
 
   constructor(canvas: HTMLCanvasElement, app: HTMLElement) {
@@ -69,6 +70,7 @@ export class Game {
 
     try { this.hi = parseInt(localStorage.getItem(CFG.hiKey) ?? '0', 10) || 0; } catch { /* private mode */ }
     document.body.dataset.state = 'idle';
+    this.el.share.addEventListener('click', () => void this.share());
     this.buildRestartIcon();
     this.reset();
     this.theme.applyCss();
@@ -226,6 +228,24 @@ export class Game {
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.sky.resize(this.camera.aspect, this.camera.fov);
+  }
+
+  /** native share sheet where available (phones), otherwise copy text + link to the clipboard */
+  private async share() {
+    const text = `I scored ${this.score} in 3D Dino! Can you beat it?`;
+    const btn = this.el.share;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: '3D Dino', text, url: CFG.siteUrl });
+      } else {
+        await navigator.clipboard.writeText(`${text} ${CFG.siteUrl}`);
+        btn.textContent = 'COPIED!';
+        setTimeout(() => (btn.textContent = 'SHARE SCORE'), 1600);
+      }
+    } catch {
+      /* share sheet dismissed */
+    }
+    btn.blur();
   }
 
   private buildRestartIcon() {

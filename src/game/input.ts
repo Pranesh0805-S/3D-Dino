@@ -14,6 +14,8 @@ export class Input {
   constructor(app: HTMLElement) {
     addEventListener('keydown', (e) => {
       const c = e.code;
+      // let buttons and links keep their normal Enter / Space behaviour
+      if ((c === 'Enter' || c === 'Space') && (e.target as HTMLElement).closest?.('#gameover a, #gameover button, #brand a')) return;
       if (JUMP.has(c) || c === 'Enter') {
         e.preventDefault();
         if (!e.repeat) this.pressJump();
@@ -46,7 +48,7 @@ export class Input {
       for (const ev of ['pointerup', 'pointercancel', 'pointerleave'] as const) b.addEventListener(ev, () => set(false));
     });
     app.addEventListener('pointerdown', (e) => {
-      if ((e.target as HTMLElement).closest('#touch, #brand')) return;
+      if ((e.target as HTMLElement).closest('#touch, #brand, #gameover a, #gameover button')) return;
       this.pressJump();
     });
     app.addEventListener('pointerup', () => this.releaseJump());

@@ -32,6 +32,8 @@ export const CFG = {
   pteraExtraSpeed: 4,
 
   hiKey: 'dino3d:hi',
+  siteUrl: 'https://3-d-dino.vercel.app/',
+  repoUrl: 'https://github.com/Pranesh0805-S/3D-Dino',
 };
 
 export const AIR_TIME = (2 * CFG.jumpVel) / CFG.gravity;

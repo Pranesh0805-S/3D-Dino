@@ -26,7 +26,7 @@ html, body {
 #overlay {
   position: absolute; inset: 0; pointer-events: none;
   display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-  padding-top: 24vh; text-align: center;
+  padding-top: 17vh; text-align: center;
 }
 #hint p { margin: 0 0 1.4em; font-size: clamp(10px, 1.8vw, 16px); letter-spacing: 0.08em; }
 #hint .keys { color: var(--dim); font-size: clamp(8px, 1.2vw, 11px); }
@@ -89,3 +89,15 @@ body[data-state='running'] #brand { opacity: .3; } /* stays out of the way while
 
 @media (max-width: 600px) { .brand-name { display: none; } #brand { top: 4vh; } }
 @media (prefers-reduced-motion: reduce) { .gh-btn, .gh-btn * { animation: none !important; transition: none !important; } }
+
+/* ---------- game-over actions ---------- */
+.gh-btn { border: 0; cursor: pointer; }
+.go-actions { margin-top: 26px; pointer-events: auto; }
+.go-actions .gh-btn { padding: 11px 16px; }
+.go-credit {
+  position: fixed; left: 0; right: 0; bottom: 4vh; margin: 0; text-align: center;
+  font-size: clamp(8px, 1.1vw, 10px); letter-spacing: .1em; color: var(--dim);
+}
+@media (pointer: coarse) { .go-credit { bottom: calc(68px + 9vh); } }
+.go-credit a { color: var(--fg); text-decoration: none; border-bottom: 2px solid var(--dim); pointer-events: auto; }
+.go-credit a:hover, .go-credit a:focus-visible { color: var(--bg); background: var(--fg); border-bottom-color: var(--fg); outline: none; }
