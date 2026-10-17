@@ -4,8 +4,16 @@ import { AIR_TIME, CFG } from './config';
 import { Obstacles } from './obstacles';
 import type { Theme } from './theme';
 import type { Box } from './player';
+import type { Rules } from './rules';
 
-interface Slab { group: THREE.Group; front: number; back: number; geos: THREE.BufferGeometry[] }
+interface Slab {
+  group: THREE.Group; front: number; back: number; geos: THREE.BufferGeometry[];
+  sz: number; // z of the next row to place on this slab (rows are placed lazily, close to the player)
+  end: number; // no rows beyond this (room to take off for the next gap)
+  calm: boolean; // next to a duck zone: plain rows only
+}
+
+const LOOKAHEAD = 85; // obstacles appear this far ahead, so the rule engine reacts to what you did a moment ago
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
@@ -15,8 +23,9 @@ export class World {
   readonly obstacles: Obstacles;
   private slabs: Slab[] = [];
   private edge = 0; // z of the far end of generated terrain
+  private rowId = 0;
 
-  constructor(private th: Theme) {
+  constructor(private th: Theme, private rules: Rules) {
     this.obstacles = new Obstacles(this.group, th);
   }
 
@@ -25,9 +34,12 @@ export class World {
     this.slabs.length = 0;
     this.obstacles.clear();
     // long safe runway to start on
-    this.addSlab(16, -60);
+    this.rowId = 0;
+    this.addSlab(16, -60, 0, 0, false);
     this.edge = -60;
-    this.generate(CFG.speed0, 0);
+    const v = this.rules.startSpeed();
+    this.generate(v, 0);
+    this.spawnRows(v, 0);
   }
 
   update(dt: number, speed: number, score: number) {
@@ -39,8 +51,10 @@ export class World {
       if (s.back > CFG.despawnZ + 4) { this.removeSlab(s); this.slabs.splice(i, 1); }
     }
     this.edge += dz;
+    for (const s of this.slabs) { s.sz += dz; s.end += dz; }
     this.obstacles.update(dt, dz);
     this.generate(speed, score);
+    this.spawnRows(speed, score);
   }
 
   /** is there solid floor at world z (dino sits at z≈0)? */
@@ -55,46 +69,76 @@ export class World {
   private generate(speed: number, score: number) {
     const jump = speed * AIR_TIME;
     while (this.edge > -CFG.spawnDist) {
-      const gap = Math.max(3.2, jump * rand(0.3, 0.5));
+      const gap = Math.max(3.2, jump * this.rules.gapFactor());
       const front = this.edge - gap;
+      const pts = this.rules.planSlab(score);
+      if (pts > 0) {
+        // duck zone: landing room, the low ceiling, then room to stand up and take off
+        const len = pts / CFG.scorePerUnit;
+        const runIn = jump * 0.75 + 8;
+        const runOut = jump * 0.85 + 9;
+        const back = front - runIn - len - runOut;
+        const prev = this.slabs[this.slabs.length - 1];
+        if (prev) prev.calm = true; // nothing nasty right before it
+        this.addSlab(front, back, 0, 0, true);
+        this.obstacles.addTunnel(front - runIn - len / 2, len, 'DUCK ZONE - HOLD DOWN!');
+        this.edge = back;
+        continue;
+      }
       const back = front - rand(32, 58) - jump * 0.5;
-      this.addSlab(front, back);
-      this.populate(front, back, jump, score);
+      // keep room to land after a gap jump and to take off for the next one
+      const sz = front - Math.max(9, jump * 0.75 + 3);
+      const end = back + jump * 0.85 + 5;
+      const calm = this.slabs.length > 0 && this.slabs[this.slabs.length - 1].group.userData.tunnel === true;
+      this.addSlab(front, back, sz, end, false, calm);
       this.edge = back;
     }
   }
 
-  private populate(front: number, back: number, jump: number, score: number) {
-    // keep room to land after a gap jump and to take off for the next one
-    let z = front - Math.max(9, jump * 0.75 + 3);
-    const end = back + jump * 0.85 + 5;
-    const ptera = score >= CFG.pteraMinScore;
-    while (z > end) {
-      const r = Math.random();
-      if (ptera && r > 0.8) {
-        // birds fly faster than the ground scrolls, so spawn them further out to arrive on schedule
-        const speed = jump / AIR_TIME;
-        this.obstacles.addPtera(rand(-4, 4), z * (1 + CFG.pteraExtraSpeed / speed), pick([0.15, 1.15, 1.15, 2.35]));
-      } else if (r > 0.6) {
-        // wall of small cacti with a 1–2 wide opening
-        const gapAt = Math.floor(rand(0, 7));
-        for (let i = 0; i < 7; i++) {
-          if (i === gapAt || (Math.random() < 0.4 && i === gapAt + 1)) continue;
-          this.obstacles.addCactus(-4.8 + i * 1.6, z, false);
-        }
-      } else if (r > 0.4) {
-        const n = Math.random() < 0.5 ? 2 : 3;
-        const x = rand(-4.2, 4.2);
-        for (let i = 0; i < n; i++) this.obstacles.addCactus(x, z - i * 1.3, n === 2 && Math.random() < 0.5);
-        z -= (n - 1) * 1.3;
-      } else {
-        this.obstacles.addCactus(rand(-4.2, 4.2), z, Math.random() < 0.45);
+  /** place rows of obstacles on slabs, but only once they are within LOOKAHEAD of the player */
+  private spawnRows(speed: number, score: number) {
+    const jump = speed * AIR_TIME;
+    for (const s of this.slabs) {
+      while (s.sz > s.end && s.sz > -LOOKAHEAD) {
+        const z = this.placeRow(s, s.sz, speed, score);
+        s.sz = z - this.rules.spacing(jump);
       }
-      z -= jump * rand(0.85, 1.5) + 5;
     }
   }
 
-  private addSlab(front: number, back: number) {
+  /** returns the z of the last obstacle placed (rows can be several cacti deep) */
+  private placeRow(s: Slab, z: number, speed: number, score: number): number {
+    const row = ++this.rowId;
+    const { kind, tag } = this.rules.nextRow(score, s.calm);
+    // birds fly faster than the ground scrolls, so spawn them further out to arrive on schedule
+    const birdZ = z * (1 + CFG.pteraExtraSpeed / speed);
+
+    if (kind === 'wall') { this.obstacles.addWall(z, row, tag); return z; }
+    if (kind === 'birds-duck') { this.obstacles.addBirdWall(birdZ, 1.15, row, tag); return z; }
+    if (kind === 'birds-jump') { this.obstacles.addBirdWall(birdZ, 0.15, row, tag); return z; }
+
+    const r = Math.random();
+    if (score >= this.rules.pteraFrom() && r > this.rules.pteraChance()) {
+      this.obstacles.addPtera(rand(-4, 4), birdZ, pick([0.15, 1.15, 1.15, 2.35]), row);
+    } else if (r > 0.6) {
+      // wall of small cacti with a 1–2 wide opening
+      const gapAt = Math.floor(rand(0, 7));
+      for (let i = 0; i < 7; i++) {
+        if (i === gapAt || (Math.random() < 0.4 && i === gapAt + 1)) continue;
+        this.obstacles.addCactus(-4.8 + i * 1.6, z, false, row);
+      }
+    } else if (r > 0.4) {
+      const n = Math.random() < 0.5 ? 2 : 3;
+      const x = rand(-4.2, 4.2);
+      for (let i = 0; i < n; i++) this.obstacles.addCactus(x, z - i * 1.3, n === 2 && Math.random() < 0.5, row);
+      return z - (n - 1) * 1.3;
+    } else {
+      this.obstacles.addCactus(rand(-4.2, 4.2), z, Math.random() < 0.45, row);
+    }
+    return z;
+  }
+
+  private addSlab(front: number, back: number, sz: number, end: number, tunnel: boolean, calm = false) {
     const L = front - back;
     const W = CFG.groundW;
     const group = new THREE.Group();
@@ -139,7 +183,8 @@ export class World {
 
     group.position.z = (front + back) / 2;
     this.group.add(group);
-    this.slabs.push({ group, front, back, geos });
+    group.userData.tunnel = tunnel;
+    this.slabs.push({ group, front, back, geos, sz: tunnel ? back : sz, end: tunnel ? back : end, calm: tunnel || calm });
   }
 
   private removeSlab(s: Slab) {

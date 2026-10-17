@@ -10,16 +10,18 @@ export class Input {
   jumpHeld = false;
   onJumpPress: () => void = () => {};
   onJumpRelease: () => void = () => {};
+  onMode: () => void = () => {};
 
   constructor(app: HTMLElement) {
     addEventListener('keydown', (e) => {
       const c = e.code;
       // let buttons and links keep their normal Enter / Space behaviour
-      if ((c === 'Enter' || c === 'Space') && (e.target as HTMLElement).closest?.('#gameover a, #gameover button, #brand a')) return;
+      if ((c === 'Enter' || c === 'Space') && (e.target as HTMLElement).closest?.('#gameover a, #gameover button, #brand a, #brand button')) return;
       if (JUMP.has(c) || c === 'Enter') {
         e.preventDefault();
         if (!e.repeat) this.pressJump();
-      } else if (DOWN.has(c)) { e.preventDefault(); this.down = true; }
+      } else if (c === 'KeyM') { if (!e.repeat) this.onMode(); }
+      else if (DOWN.has(c)) { e.preventDefault(); this.down = true; }
       else if (LEFT.has(c)) { e.preventDefault(); this.left = true; }
       else if (RIGHT.has(c)) { e.preventDefault(); this.right = true; }
     });

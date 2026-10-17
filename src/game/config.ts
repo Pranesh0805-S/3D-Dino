@@ -32,8 +32,13 @@ export const CFG = {
   pteraExtraSpeed: 4,
 
   hiKey: 'dino3d:hi',
+  modeKey: 'dino3d:mode',
+  tunnelY: 1.45, // underside of a duck-zone ceiling (a ducked dino is ~1.4 tall, standing is 2.3)
   siteUrl: 'https://3-d-dino.vercel.app/',
   repoUrl: 'https://github.com/Pranesh0805-S/3D-Dino',
 };
 
 export const AIR_TIME = (2 * CFG.jumpVel) / CFG.gravity;
+
+/** easy keeps the original `dino3d:hi` key so existing high scores survive */
+export const hiKeyFor = (mode: 'easy' | 'hard') => (mode === 'hard' ? `${CFG.hiKey}:hard` : CFG.hiKey);

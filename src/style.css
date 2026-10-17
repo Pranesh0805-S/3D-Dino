@@ -101,3 +101,16 @@ body[data-state='running'] #brand { opacity: .3; } /* stays out of the way while
 @media (pointer: coarse) { .go-credit { bottom: calc(68px + 9vh); } }
 .go-credit a { color: var(--fg); text-decoration: none; border-bottom: 2px solid var(--dim); pointer-events: auto; }
 .go-credit a:hover, .go-credit a:focus-visible { color: var(--bg); background: var(--fg); border-bottom-color: var(--fg); outline: none; }
+
+/* ---------- mode + rule callouts ---------- */
+#tag { color: var(--fg); border: 2px solid currentColor; padding: .15em .45em; align-self: center; font-size: .6em; letter-spacing: .12em; }
+#tag:empty { display: none; }
+#callout {
+  position: absolute; top: 14vh; left: 0; right: 0; text-align: center; pointer-events: none;
+  font-size: clamp(10px, 2vw, 18px); letter-spacing: .12em; color: var(--fg);
+}
+#callout:not(:empty) { animation: callin .6s steps(1) 1; }
+@keyframes callin { 0% { opacity: 0; } 20% { opacity: 1; } 40% { opacity: 0; } 60% { opacity: 1; } }
+#mode { padding: 9px 12px; font-size: 10px; }
+body[data-mode='hard'] #mode { color: var(--bg); background: var(--fg); }
+body[data-state='running'] #mode, body[data-state='paused'] #mode { display: none; }

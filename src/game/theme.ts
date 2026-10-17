@@ -21,6 +21,8 @@ export class Theme {
   ground = new THREE.MeshLambertMaterial();
   line = new THREE.MeshBasicMaterial();
   speck = new THREE.MeshBasicMaterial();
+  deck = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.26, depthWrite: false });
+  beam = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.55, depthWrite: false });
   outline = new THREE.LineBasicMaterial();
   eye = new THREE.MeshBasicMaterial();
   cloud = new THREE.Color();
@@ -56,6 +58,8 @@ export class Theme {
     this.mix('ground', this.ground.color);
     this.mix('line', this.line.color);
     this.mix('speck', this.speck.color);
+    this.mix('line', this.deck.color);
+    this.mix('line', this.beam.color);
     this.mix('outline', this.outline.color);
     this.mix('eye', this.eye.color);
     this.mix('cloud', this.cloud);

@@ -1,7 +1,8 @@
 import * as THREE from 'three';
-import { CFG } from './config';
+import { CFG, hiKeyFor } from './config';
 import { Input } from './input';
 import { Player } from './player';
+import { Rules, type Mode } from './rules';
 import { Sfx } from './audio';
 import { Sky } from './sky';
 import { Theme } from './theme';
@@ -17,6 +18,7 @@ export class Game {
   readonly scene = new THREE.Scene();
   readonly camera = new THREE.PerspectiveCamera(55, 1, 0.1, 400);
   readonly theme = new Theme();
+  readonly rules = new Rules();
   readonly world: World;
   readonly player: Player;
   readonly input: Input;
@@ -31,6 +33,7 @@ export class Game {
   score = 0;
   hi = 0;
   private lastMilestone = 0;
+  private calloutT = 0;
   private flashT = 0;
   private deadT = 0;
   private lastTxt = '';
@@ -40,7 +43,8 @@ export class Game {
   private el = {
     score: $('score'), hi: $('hi'), hint: $('hint'), over: $('gameover'),
     hintTitle: document.querySelector('#hint .blink') as HTMLElement,
-    share: $('share'),
+    share: $('share'), mode: $('mode'), tag: $('tag'), callout: $('callout'),
+    modeHint: $('mode-hint'),
   };
 
   constructor(canvas: HTMLCanvasElement, app: HTMLElement) {
@@ -59,7 +63,7 @@ export class Game {
     this.camera.add(this.sky.group);
     this.camera.position.set(5.6, 3.9, 8);
 
-    this.world = new World(this.theme);
+    this.world = new World(this.theme, this.rules);
     this.player = new Player(this.theme);
     this.scene.add(this.world.group, this.player.root, this.player.shadowMesh);
     this.player.onJump = () => this.sfx.jump();
@@ -67,12 +71,17 @@ export class Game {
     this.input = new Input(app);
     this.input.onJumpPress = () => this.onPress();
     this.input.onJumpRelease = () => this.player.releaseJump();
+    this.input.onMode = () => this.toggleMode();
+    this.rules.onEvent = (m) => this.callout(m);
+    this.el.mode.addEventListener('click', () => { this.toggleMode(); this.el.mode.blur(); });
 
-    try { this.hi = parseInt(localStorage.getItem(CFG.hiKey) ?? '0', 10) || 0; } catch { /* private mode */ }
+    try { if (localStorage.getItem(CFG.modeKey) === 'hard') this.rules.mode = 'hard'; } catch { /* private mode */ }
+    this.loadHi();
     document.body.dataset.state = 'idle';
     this.el.share.addEventListener('click', () => void this.share());
     this.buildRestartIcon();
     this.reset();
+    this.syncModeUi();
     this.theme.applyCss();
     this.updateHud(true);
 
@@ -91,10 +100,13 @@ export class Game {
   }
 
   private reset() {
+    this.rules.reset();
     this.world.reset();
     this.player.reset();
     this.speed = 0; this.dist = 0; this.time = 0; this.score = 0;
-    this.lastMilestone = 0; this.flashT = 0; this.deadT = 0;
+    this.lastMilestone = 0; this.flashT = 0; this.deadT = 0; this.calloutT = 0;
+    this.rules.reset();
+    this.el.callout.textContent = '';
     this.theme.setNight(true);
     this.el.over.hidden = true;
     this.el.hintTitle.textContent = 'PRESS SPACE TO START';
@@ -120,7 +132,7 @@ export class Game {
 
   private begin() {
     this.setState('running');
-    this.speed = CFG.speed0;
+    this.speed = this.rules.startSpeed();
     this.el.hint.classList.add('hidden');
   }
 
@@ -137,7 +149,7 @@ export class Game {
     this.sfx.die();
     if (this.score > this.hi) {
       this.hi = this.score;
-      try { localStorage.setItem(CFG.hiKey, String(this.hi)); } catch { /* ignore */ }
+      try { localStorage.setItem(hiKeyFor(this.rules.mode), String(this.hi)); } catch { /* ignore */ }
     }
     this.el.score.classList.remove('flash');
     this.el.over.hidden = false;
@@ -161,7 +173,7 @@ export class Game {
 
     if (this.state === 'running') {
       this.time += dt;
-      this.speed = Math.min(CFG.speedMax, CFG.speed0 + CFG.accel * this.time);
+      this.speed = this.rules.targetSpeed(this.score, this.time);
       this.dist += this.speed * dt;
       this.score = Math.floor(this.dist * CFG.scorePerUnit);
 
@@ -178,6 +190,7 @@ export class Game {
       this.player.update(dt, this.input, this.speed, supported, true);
       this.player.shadowMesh.visible &&= supported;
       this.sky.update(dt, this.speed, this.theme);
+      this.rules.observe(dt, this.score, this.player, this.world.obstacles.list);
 
       if (!supported && this.player.y <= 0) this.die();
       else if (this.world.collides(this.player.hitbox())) this.die();
@@ -191,6 +204,44 @@ export class Game {
 
     this.updateCamera(dt);
     this.updateHud(false, dt);
+    if (this.calloutT > 0 && (this.calloutT -= dt) <= 0) this.el.callout.textContent = '';
+  }
+
+  // ---------------- mode ----------------
+  private loadHi() {
+    this.hi = 0;
+    try { this.hi = parseInt(localStorage.getItem(hiKeyFor(this.rules.mode)) ?? '0', 10) || 0; } catch { /* private mode */ }
+  }
+
+  /** EASY <-> HARD. Only between runs. */
+  toggleMode() {
+    if (this.state === 'running' || this.state === 'paused') return;
+    this.sfx.unlock();
+    this.setMode(this.rules.mode === 'hard' ? 'easy' : 'hard');
+  }
+
+  setMode(m: Mode) {
+    this.rules.mode = m;
+    try { localStorage.setItem(CFG.modeKey, m); } catch { /* ignore */ }
+    this.loadHi();
+    this.reset();
+    this.setState('idle');
+    this.syncModeUi();
+    this.updateHud(true);
+  }
+
+  private syncModeUi() {
+    const hard = this.rules.hard;
+    document.body.dataset.mode = this.rules.mode;
+    this.el.mode.textContent = hard ? 'MODE: HARD' : 'MODE: EASY';
+    this.el.mode.setAttribute('aria-label', `Game mode: ${this.rules.mode}. Press to switch.`);
+    this.el.tag.textContent = hard ? 'HARD' : '';
+    this.el.modeHint.textContent = hard ? 'PRESS M FOR EASY MODE' : 'PRESS M FOR HARD MODE';
+  }
+
+  private callout(msg: string) {
+    this.el.callout.textContent = msg;
+    this.calloutT = 1.7;
   }
 
   private updateCamera(dt: number) {
@@ -232,7 +283,7 @@ export class Game {
 
   /** native share sheet where available (phones), otherwise copy text + link to the clipboard */
   private async share() {
-    const text = `I scored ${this.score} in 3D Dino! Can you beat it?`;
+    const text = `I scored ${this.score} on ${this.rules.hard ? 'HARD mode' : 'EASY mode'} in 3D Dino! Can you beat it?`;
     const btn = this.el.share;
     try {
       if (navigator.share) {

@@ -62,11 +62,18 @@
           <li>Press the Down arrow to duck under pterodactyls.</li>
           <li>Use the Left and Right arrows (or A and D) to move sideways.</li>
           <li>On a phone, use the on-screen buttons or tap to jump.</li>
+          <li>Press M or the mode button to switch between Easy and Hard mode.</li>
         </ul>
         <h2>Features</h2>
         <p>
           Pixel-art voxel graphics, a day and night cycle every 700 points, speed that keeps rising,
           gaps in the track, and a high score saved in your browser.
+        </p>
+        <h2>Hard mode</h2>
+        <p>
+          Hard mode has a rule engine that reacts to how you play. Keep sidestepping obstacles and it builds a full wall you
+          must jump. Skip ducking and it builds a long low ceiling you must duck under for 100 to 200 points. The game speeds up
+          until 2000 points, with a three-wall gauntlet every 1000 points.
         </p>
         <noscript>3D Dino needs JavaScript and WebGL. Please enable JavaScript to play.</noscript>
       </main>
@@ -74,9 +81,12 @@
       <canvas id="game"></canvas>
 
       <div id="hud">
+        <span id="tag"></span>
         <span id="hi"></span>
         <span id="score">00000</span>
       </div>
+
+      <div id="callout" role="status" aria-live="polite"></div>
 
       <nav id="brand" aria-label="Project links">
         <div class="brand-name">3D DINO<small>BY PRANESH</small></div>
@@ -90,6 +100,7 @@
           <svg class="gh-star" viewBox="0 0 9 9" fill="currentColor" aria-hidden="true"><rect x="4" y="0" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="7" y="3" width="1" height="1"/><rect x="8" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="6" y="4" width="1" height="1"/><rect x="7" y="4" width="1" height="1"/><rect x="2" y="5" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="4" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="6" y="5" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/><rect x="6" y="6" width="1" height="1"/><rect x="1" y="7" width="1" height="1"/><rect x="2" y="7" width="1" height="1"/><rect x="6" y="7" width="1" height="1"/><rect x="7" y="7" width="1" height="1"/><rect x="1" y="8" width="1" height="1"/><rect x="7" y="8" width="1" height="1"/></svg>
           <span class="label"><span class="t-a">GITHUB</span><span class="t-b">STAR ME</span></span>
         </a>
+        <button id="mode" class="gh-btn" type="button">MODE: EASY</button>
       </nav>
 
       <div id="overlay">
@@ -107,6 +118,7 @@
         <div id="hint">
           <p class="blink">PRESS SPACE TO START</p>
           <p class="keys">SPACE JUMP &nbsp; DOWN DUCK &nbsp; ARROWS / A D MOVE</p>
+          <p class="keys" id="mode-hint">PRESS M FOR HARD MODE</p>
         </div>
       </div>
 
