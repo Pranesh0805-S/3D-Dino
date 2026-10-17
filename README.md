@@ -4,7 +4,7 @@
 
 ### The Chrome dino, rebuilt as a third-person 3D platformer.
 
-[![Play now](https://img.shields.io/badge/▶_PLAY_NOW-acacac?style=for-the-badge&labelColor=202124)](https://3d-dino.vercel.app)
+[![Play now](https://img.shields.io/badge/▶_PLAY_NOW-acacac?style=for-the-badge&labelColor=202124)](https://3-d-dino.vercel.app)
 &nbsp;
 ![TypeScript](https://img.shields.io/badge/TypeScript-202124?style=for-the-badge&logo=typescript&logoColor=acacac)
 ![Three.js](https://img.shields.io/badge/Three.js-202124?style=for-the-badge&logo=threedotjs&logoColor=acacac)
