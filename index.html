@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="description" content="A third-person 3D take on the Chrome dino game." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Dino 3D</title>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="game"></canvas>
+
+      <div id="hud">
+        <span id="hi"></span>
+        <span id="score">00000</span>
+      </div>
+
+      <div id="overlay">
+        <div id="gameover" hidden>
+          <div class="go-title">GAME OVER</div>
+          <div id="restart-icon"></div>
+        </div>
+        <div id="hint">
+          <p class="blink">PRESS SPACE TO START</p>
+          <p class="keys">SPACE JUMP &nbsp; DOWN DUCK &nbsp; ARROWS / A D MOVE</p>
+        </div>
+      </div>
+
+      <div id="touch">
+        <div class="pad">
+          <button data-key="left" aria-label="Left">◀</button>
+          <button data-key="right" aria-label="Right">▶</button>
+        </div>
+        <div class="pad">
+          <button data-key="down" aria-label="Duck">▼</button>
+          <button data-key="jump" aria-label="Jump">▲</button>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

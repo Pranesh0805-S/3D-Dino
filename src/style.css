@@ -1,0 +1,48 @@
+:root {
+  --bg: #202124;
+  --fg: #acacac;
+  --dim: #7a7a7a;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0; height: 100%; overflow: hidden;
+  background: var(--bg); color: var(--fg);
+  font-family: 'Press Start 2P', monospace;
+  user-select: none; -webkit-user-select: none; touch-action: none;
+}
+#app { position: fixed; inset: 0; }
+#game {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  image-rendering: pixelated; image-rendering: crisp-edges;
+}
+#hud {
+  position: absolute; top: 6vh; right: 4vw;
+  display: flex; gap: 1.6em; font-size: clamp(12px, 2.4vw, 22px);
+  letter-spacing: 0.05em; color: var(--fg); text-shadow: 0 0 0 currentColor;
+}
+#hi { color: var(--dim); }
+#hi.hidden { visibility: hidden; }
+#score.flash { visibility: hidden; }
+#overlay {
+  position: absolute; inset: 0; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  padding-top: 24vh; text-align: center;
+}
+#hint p { margin: 0 0 1.4em; font-size: clamp(10px, 1.8vw, 16px); letter-spacing: 0.08em; }
+#hint .keys { color: var(--dim); font-size: clamp(8px, 1.2vw, 11px); }
+#hint.hidden, #gameover[hidden] { display: none; }
+.blink { animation: blink 1.1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.go-title { font-size: clamp(14px, 3vw, 28px); letter-spacing: 0.35em; margin-bottom: 1.4em; }
+#restart-icon { width: 60px; height: 60px; margin: 0 auto; }
+#restart-icon svg { width: 100%; height: 100%; shape-rendering: crispEdges; }
+
+#touch { display: none; position: absolute; left: 0; right: 0; bottom: 4vh; padding: 0 4vw; justify-content: space-between; }
+.pad { display: flex; gap: 14px; }
+#touch button {
+  font-family: inherit; font-size: 20px; width: 68px; height: 68px;
+  color: var(--fg); background: rgba(172,172,172,.12);
+  border: 3px solid var(--fg); border-radius: 0; touch-action: none;
+}
+#touch button:active { background: rgba(172,172,172,.35); }
+@media (pointer: coarse) { #touch { display: flex; } }
