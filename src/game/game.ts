@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { CFG, hiKeyFor } from './config';
 import { Input } from './input';
 import { Player } from './player';
+import { PORTAL, Portal } from './portal';
 import { Rules, type Mode } from './rules';
 import { Sfx } from './audio';
 import { Sky } from './sky';
@@ -36,6 +37,9 @@ export class Game {
   private calloutT = 0;
   private runBest = 0; // HI when this run started
   private hiShown = false;
+  private deathsSinceAd = 0;
+  private lastAdAt = 0;
+  private adBusy = false;
   private flashT = 0;
   private deadT = 0;
   private lastTxt = '';
@@ -49,7 +53,7 @@ export class Game {
     modeHint: $('mode-hint'), snd: $('snd'), pauseBtn: $('pausebtn'), newHi: $('newhi'),
   };
 
-  constructor(canvas: HTMLCanvasElement, app: HTMLElement) {
+  constructor(canvas: HTMLCanvasElement, app: HTMLElement, private portal: Portal = new Portal()) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
     this.renderer.setPixelRatio(1);
 
@@ -73,6 +77,7 @@ export class Game {
     this.input = new Input(app);
     this.input.onJumpPress = () => this.onPress();
     this.input.onJumpRelease = () => this.player.releaseJump();
+    this.portal.onMuteChange = (silent) => { this.sfx.suspended = silent; };
     this.input.onMode = () => this.toggleMode();
     this.input.onPause = () => this.pause();
     this.el.pauseBtn.addEventListener('click', () => { this.pause(); this.el.pauseBtn.blur(); });
@@ -102,7 +107,10 @@ export class Game {
 
   // ---------------- state ----------------
   private setState(s: State) {
+    const was = this.state;
     this.state = s;
+    if (s === 'running' && was !== 'running') this.portal.gameplayStart();
+    else if (s !== 'running' && was === 'running') this.portal.gameplayStop();
     document.body.dataset.state = s;
   }
 
@@ -131,10 +139,24 @@ export class Game {
       this.el.hint.classList.add('hidden');
     } else if (this.state === 'running') {
       this.player.requestJump();
-    } else if (this.state === 'dead' && this.deadT > 0.45) {
-      this.reset();
-      this.begin();
+    } else if (this.state === 'dead' && this.deadT > 0.45 && !this.adBusy) {
+      void this.restart();
     }
+  }
+
+  /** restart after game over; on the portal an ad plays first, but only every few deaths */
+  private async restart() {
+    this.deathsSinceAd++;
+    const due = PORTAL && this.portal.active && this.deathsSinceAd >= 3 && performance.now() - this.lastAdAt > 150_000;
+    if (due) {
+      this.adBusy = true;
+      await this.portal.midgameAd();
+      this.adBusy = false;
+      this.deathsSinceAd = 0;
+      this.lastAdAt = performance.now();
+    }
+    this.reset();
+    this.begin();
   }
 
   private begin() {
@@ -196,6 +218,7 @@ export class Game {
       }
       if (this.runBest > 0 && !this.hiShown && this.score > this.runBest) {
         this.hiShown = true;
+        this.portal.happytime();
         this.sfx.point();
         this.callout('NEW HI!');
       }

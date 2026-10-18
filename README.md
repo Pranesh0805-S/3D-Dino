@@ -4,7 +4,7 @@
 
 ### The Chrome dino, rebuilt as a third-person 3D platformer.
 
-[![Play now](https://img.shields.io/badge/▶_PLAY_NOW-acacac?style=for-the-badge&labelColor=202124)](https://3-d-dino.vercel.app)
+[![Play now](https://img.shields.io/badge/▶_PLAY_NOW-acacac?style=for-the-badge&labelColor=202124)](https://3d-dino.vercel.app)
 &nbsp;
 ![TypeScript](https://img.shields.io/badge/TypeScript-202124?style=for-the-badge&logo=typescript&logoColor=acacac)
 ![Three.js](https://img.shields.io/badge/Three.js-202124?style=for-the-badge&logo=threedotjs&logoColor=acacac)
@@ -63,6 +63,12 @@
 
 Hard also uses wider gaps, tighter spacing and birds from 100 points. Every number is in the `HARD` object at the top of `rules.ts`.
 
+## 🎮 Game-portal build (CrazyGames)
+
+The same code can be built for game portals. `npm run build:portal` writes `dist-portal/` with the [CrazyGames SDK](https://docs.crazygames.com/sdk/intro/) switched on:
+a midgame ad on every 3rd restart (never sooner than 150 s apart, sound muted while it plays), gameplay start/stop and loading events, and no external links.
+The normal `npm run build` (Vercel) never loads the SDK. Submission steps: [`docs/PORTAL.md`](docs/PORTAL.md).
+
 <details>
 <summary><b>🚀 Run it locally</b></summary>
 
@@ -112,6 +118,7 @@ vercel --prod
       ├─ obstacles.ts    cacti, pterodactyls, collisions
       ├─ world.ts        endless track, gaps, spawning rows + duck zones
       ├─ rules.ts        Easy / Hard rule engine (the director)
+      ├─ portal.ts       CrazyGames SDK wrapper (portal build only)
       ├─ input.ts        keyboard + touch
       ├─ audio.ts        WebAudio sound effects
       └─ game.ts         state machine, camera, score / HI

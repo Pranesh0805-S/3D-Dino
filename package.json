@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "build:portal": "tsc --noEmit && vite build --mode portal",
+    "preview": "vite preview",
+    "preview:portal": "vite preview --outDir dist-portal"
   },
   "dependencies": {
     "@fontsource/press-start-2p": "^5.2.0",

@@ -124,3 +124,8 @@ body[data-state='running'] #tools { opacity: .45; }
 #tools:hover, #tools:focus-within { opacity: 1; }
 #newhi { margin: -.6em 0 1em; font-size: clamp(10px, 1.8vw, 16px); letter-spacing: .2em; animation: blink .8s steps(1) infinite; }
 #newhi[hidden] { display: none; }
+
+/* ---------- portal build (game sites): no links that lead players away ---------- */
+body[data-portal] #brand a.gh-btn,
+body[data-portal] .go-actions,
+body[data-portal] .go-credit { display: none; }
