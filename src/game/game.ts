@@ -18,6 +18,7 @@ export class Game {
   readonly renderer: THREE.WebGLRenderer;
   readonly scene = new THREE.Scene();
   readonly camera = new THREE.PerspectiveCamera(55, 1, 0.1, 400);
+  private pull = 0;
   readonly theme = new Theme();
   readonly rules = new Rules();
   readonly world: World;
@@ -304,6 +305,7 @@ export class Game {
     const ty = 3.9 + h * 0.3;
     this.camera.position.x += (tx - this.camera.position.x) * k;
     this.camera.position.y += (ty - this.camera.position.y) * k;
+    this.camera.position.z = 8 + this.pull;
     this.camLook.x += (p.x * 0.5 - this.camLook.x) * k;
     this.camLook.y += (1.4 + h * 0.35 - this.camLook.y) * k;
     this.camera.lookAt(this.camLook);
@@ -328,7 +330,12 @@ export class Game {
     // render at low resolution and let CSS scale it up => chunky pixels like the original
     const px = Math.max(2, Math.round(h / 330));
     this.renderer.setSize(Math.ceil(w / px), Math.ceil(h / px), false);
-    this.camera.aspect = w / h;
+    const a = w / h;
+    // narrow (portrait) screens: widen the view and step the camera back so the dino and lanes stay in frame
+    const narrow = Math.max(0, Math.min(1, (1.25 - a) / 0.75));
+    this.camera.fov = 55 + 20 * narrow;
+    this.pull = 7 * narrow;
+    this.camera.aspect = a;
     this.camera.updateProjectionMatrix();
     this.sky.resize(this.camera.aspect, this.camera.fov);
   }
