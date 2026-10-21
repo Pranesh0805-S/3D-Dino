@@ -4,3 +4,4 @@ dist
 *.log
 dist-portal
 *.zip
+qa/
