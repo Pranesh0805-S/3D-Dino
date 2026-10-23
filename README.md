@@ -11,6 +11,9 @@
 ![Vite](https://img.shields.io/badge/Vite-202124?style=for-the-badge&logo=vite&logoColor=acacac)
 ![Vercel](https://img.shields.io/badge/Vercel-202124?style=for-the-badge&logo=vercel&logoColor=acacac)
 
+[![QA: 76/100](https://img.shields.io/badge/QA_run-76%2F100-202124?style=for-the-badge&labelColor=202124&color=acacac)](https://github.com/Pranesh0805-S/Game-Dev-Skills/blob/main/examples/3d-dino-pro-run/BUG_REPORT.md)
+[![Tested with Game-Dev-Skills Pro](https://img.shields.io/badge/Tested_with-Game--Dev--Skills_Pro-202124?style=for-the-badge&labelColor=202124&color=acacac)](https://github.com/Pranesh0805-S/Game-Dev-Skills)
+
 </div>
 
 <table>
@@ -68,6 +71,22 @@ Hard also uses wider gaps, tighter spacing and birds from 100 points. Every numb
 The same code can be built for game portals. `npm run build:portal` writes `dist-portal/` with the [CrazyGames SDK](https://docs.crazygames.com/sdk/intro/) switched on:
 a midgame ad on every 3rd restart (never sooner than 150 s apart, sound muted while it plays), gameplay start/stop and loading events, and no external links.
 The normal `npm run build` (Vercel) never loads the SDK. Submission steps: [`docs/PORTAL.md`](docs/PORTAL.md).
+
+## 🧪 Tested with Game-Dev-Skills Pro
+
+This game was rule-checked and QA-tested with the Pro edition of [Game-Dev-Skills](https://github.com/Pranesh0805-S/Game-Dev-Skills), a set of Claude Skills that write a numbered `RULES.md` and then run automated checks against it.
+
+| | |
+| :-- | :-- |
+| **Release readiness** | **76 / 100 — ship with known issues** |
+| **Rules documented** | 47 (inferred from the code, linted with 0 errors) |
+| **Automated checks** | 49 run against the real `Game` class: 39 pass, 10 fail |
+| **Bugs found** | 7 — 0 critical, 1 major, 4 minor, 2 polish |
+
+- 📋 [`RULES.md`](https://github.com/Pranesh0805-S/Game-Dev-Skills/blob/main/examples/3d-dino-pro-run/RULES.md) — every rule with trigger, condition, effect and edge case
+- 🐞 [`BUG_REPORT.md`](https://github.com/Pranesh0805-S/Game-Dev-Skills/blob/main/examples/3d-dino-pro-run/BUG_REPORT.md) — severity-ranked findings, plus what was **not** tested
+
+The one major finding: pausing mid-jump keeps simulating the dino, which can cause an unfair death on resume. The report also notes that jump height varies slightly with frame rate and that Hard-mode gauntlets are rare for players who never duck. These are known and documented rather than hidden.
 
 <details>
 <summary><b>🚀 Run it locally</b></summary>
