@@ -22,6 +22,9 @@ export const CFG = {
   groundW: 12,
   spawnDist: 130,
   despawnZ: 12,
+  // the world never moves more than this per collision check (the smallest overlap window
+  // between a cactus and the dino is 1.8 units, so 0.8 leaves a wide safety margin)
+  maxStepDist: 0.8,
 
   // scoring (original: distance * 0.025; tuned for our units)
   scorePerUnit: 0.62,

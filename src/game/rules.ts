@@ -1,4 +1,5 @@
 import { CFG } from './config';
+import { random } from './rng';
 import type { Player } from './player';
 import type { Obstacle } from './obstacles';
 
@@ -37,7 +38,7 @@ export const HARD = {
   spaceAdd: 4.5,
 };
 
-const rand = (a: number, b: number) => a + Math.random() * (b - a);
+const rand = (a: number, b: number) => a + random() * (b - a);
 
 /**
  * The "director". It watches how you play and decides what the world throws at you next.
@@ -104,6 +105,9 @@ export class Rules {
   /** returns the length in score points of a duck zone to build into the next slab, or 0 */
   planSlab(score: number): number {
     if (!this.hard || this.lastSlabTunnel) { this.lastSlabTunnel = false; return 0; }
+    // a gauntlet that is due pre-empts duck zones, otherwise a player who never squats
+    // is handed duck zones back to back and the gauntlet starves (BUG-004)
+    if (score >= this.nextGauntlet) return 0;
     const lazy = score - this.lastDuckScore >= HARD.duckEvery; // hasn't squatted for a while
     const due = score - this.lastTunnelScore >= HARD.forceEvery; // squat fans still get one now and then
     if (score >= HARD.duckMinScore && (lazy || due) && this.rowsSince >= HARD.breatherRows && this.gauntletLeft === 0) {
@@ -142,7 +146,7 @@ export class Rules {
       this.rowsSince = 0;
       if (this.evadeKind === 'ptera') {
         this.stats.birdWalls++;
-        return Math.random() < 0.5
+        return random() < 0.5
           ? { kind: 'birds-duck', tag: 'BIRD WALL - DUCK!' }
           : { kind: 'birds-jump', tag: 'LOW BIRDS - JUMP!' };
       }
