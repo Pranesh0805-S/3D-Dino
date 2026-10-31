@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { CFG } from './config';
+import { fxRandom, random } from './rng';
 import { CACTUS_BIG, CACTUS_SMALL, PTERA_DOWN, PTERA_UP } from './sprites';
 import { bitmapGeometry, outlined } from './voxel';
 import type { Theme } from './theme';
@@ -75,7 +76,7 @@ export class Obstacles {
     this.parent.add(g);
     this.list.push({
       group: g, kind: 'ptera', hx: 0.55, hz: 0.85, y0: bottom, y1: bottom + 0.95,
-      vExtra: CFG.pteraExtraSpeed, wings: [up, down], t: Math.random(), row,
+      vExtra: CFG.pteraExtraSpeed, wings: [up, down], t: fxRandom(), row,
     });
   }
 
@@ -84,7 +85,7 @@ export class Obstacles {
     let x = -5.6;
     let prev = 0;
     for (let i = 0; ; i++) {
-      const big = Math.random() < 0.3;
+      const big = random() < 0.3;
       const hx = this.hxOf(big);
       if (i > 0) x += prev + hx + 0.4; // 0.4 < dino width (0.64): no squeezing through
       if (x > 5.8) break;

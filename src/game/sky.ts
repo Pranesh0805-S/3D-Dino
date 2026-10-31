@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { fxRandom } from './rng';
 import type { Theme } from './theme';
 
 // Moon, stars and clouds are camera-attached sprites drawn far behind the world,
@@ -95,7 +96,7 @@ export class Sky {
   update(dt: number, speed: number, th: Theme) {
     for (const c of this.clouds) {
       c.nx -= c.speed * dt * (0.4 + speed / 20);
-      if (c.nx < -1.3) { c.nx = 1.3; c.ny = 0.1 + Math.random() * 0.7; }
+      if (c.nx < -1.3) { c.nx = 1.3; c.ny = 0.1 + fxRandom() * 0.7; }
     }
     this.place();
     this.cloudMat.color.copy(th.cloud);

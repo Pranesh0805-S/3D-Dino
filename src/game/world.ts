@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { AIR_TIME, CFG } from './config';
 import { Obstacles } from './obstacles';
+import { random } from './rng';
 import type { Theme } from './theme';
 import type { Box } from './player';
 import type { Rules } from './rules';
@@ -15,8 +16,8 @@ interface Slab {
 
 const LOOKAHEAD = 85; // obstacles appear this far ahead, so the rule engine reacts to what you did a moment ago
 
-const rand = (a: number, b: number) => a + Math.random() * (b - a);
-const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
+const rand = (a: number, b: number) => a + random() * (b - a);
+const pick = <T,>(a: T[]) => a[Math.floor(random() * a.length)];
 
 export class World {
   readonly group = new THREE.Group();
@@ -117,23 +118,23 @@ export class World {
     if (kind === 'birds-duck') { this.obstacles.addBirdWall(birdZ, 1.15, row, tag); return z; }
     if (kind === 'birds-jump') { this.obstacles.addBirdWall(birdZ, 0.15, row, tag); return z; }
 
-    const r = Math.random();
+    const r = random();
     if (score >= this.rules.pteraFrom() && r > this.rules.pteraChance()) {
       this.obstacles.addPtera(rand(-4, 4), birdZ, pick([0.15, 1.15, 1.15, 2.35]), row);
     } else if (r > 0.6) {
       // wall of small cacti with a 1–2 wide opening
       const gapAt = Math.floor(rand(0, 7));
       for (let i = 0; i < 7; i++) {
-        if (i === gapAt || (Math.random() < 0.4 && i === gapAt + 1)) continue;
+        if (i === gapAt || (random() < 0.4 && i === gapAt + 1)) continue;
         this.obstacles.addCactus(-4.8 + i * 1.6, z, false, row);
       }
     } else if (r > 0.4) {
-      const n = Math.random() < 0.5 ? 2 : 3;
+      const n = random() < 0.5 ? 2 : 3;
       const x = rand(-4.2, 4.2);
-      for (let i = 0; i < n; i++) this.obstacles.addCactus(x, z - i * 1.3, n === 2 && Math.random() < 0.5, row);
+      for (let i = 0; i < n; i++) this.obstacles.addCactus(x, z - i * 1.3, n === 2 && random() < 0.5, row);
       return z - (n - 1) * 1.3;
     } else {
-      this.obstacles.addCactus(rand(-4.2, 4.2), z, Math.random() < 0.45, row);
+      this.obstacles.addCactus(rand(-4.2, 4.2), z, random() < 0.45, row);
     }
     return z;
   }

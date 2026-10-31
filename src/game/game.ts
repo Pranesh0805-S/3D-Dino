@@ -3,6 +3,7 @@ import { CFG, hiKeyFor } from './config';
 import { Input } from './input';
 import { Player } from './player';
 import { PORTAL, Portal } from './portal';
+import { newSeed, seedRng } from './rng';
 import { Rules, type Mode } from './rules';
 import { Sfx } from './audio';
 import { Sky } from './sky';
@@ -46,6 +47,9 @@ export class Game {
   private lastTxt = '';
   private camLook = new THREE.Vector3(0, 1.4, -7);
   private last = performance.now();
+  /** seed of the current run; open the game with ?seed=123 to replay a run (BUG-005) */
+  seed = 0;
+  private forcedSeed: number | null = null;
 
   private el = {
     score: $('score'), hi: $('hi'), hint: $('hint'), over: $('gameover'),
@@ -89,6 +93,10 @@ export class Game {
     this.el.mode.addEventListener('click', () => { this.toggleMode(); this.el.mode.blur(); });
 
     try { if (localStorage.getItem(CFG.modeKey) === 'hard') this.rules.mode = 'hard'; } catch { /* private mode */ }
+    try {
+      const s = Number(new URLSearchParams(location.search).get('seed'));
+      if (Number.isInteger(s) && s > 0) this.forcedSeed = s >>> 0; // first run only
+    } catch { /* no location (tests) */ }
     this.loadHi();
     document.body.dataset.state = 'idle';
     this.el.share.addEventListener('click', () => void this.share());
@@ -116,6 +124,10 @@ export class Game {
   }
 
   private reset() {
+    this.seed = this.forcedSeed ?? newSeed();
+    this.forcedSeed = null;
+    seedRng(this.seed);
+    document.body.dataset.seed = String(this.seed);
     this.rules.reset();
     this.world.reset();
     this.player.reset();
@@ -192,7 +204,8 @@ export class Game {
 
   // ---------------- loop ----------------
   private frame = (now: number) => {
-    const dt = Math.min(0.05, (now - this.last) / 1000);
+    // clamp to [0, 0.05]: a rAF timestamp earlier than `last` must never run time backwards (BUG-006)
+    const dt = Math.max(0, Math.min(0.05, (now - this.last) / 1000));
     this.last = now;
     this.step(dt);
     this.renderer.render(this.scene, this.camera);
@@ -225,16 +238,25 @@ export class Game {
       }
       this.theme.setNight(Math.floor(this.score / CFG.nightEvery) % 2 === 0);
 
-      this.world.update(dt, this.speed, this.score);
-      const supported = this.world.supported();
-      this.player.update(dt, this.input, this.speed, supported, true);
+      // Substep the world + collision so a slow frame can never jump over a cactus (BUG-003).
+      // At normal speeds and frame rates this is a single step, exactly as before.
+      const sub = Math.max(1, Math.ceil((this.speed * dt) / CFG.maxStepDist));
+      const h = dt / sub;
+      let supported = true;
+      let dead = false;
+      for (let i = 0; i < sub && !dead; i++) {
+        this.world.update(h, this.speed, this.score);
+        supported = this.world.supported();
+        this.player.update(h, this.input, this.speed, supported, true);
+        dead = (!supported && this.player.y <= 0) || this.world.collides(this.player.hitbox());
+      }
       this.player.shadowMesh.visible &&= supported;
       this.sky.update(dt, this.speed, this.theme);
       this.rules.observe(dt, this.score, this.player, this.world.obstacles.list);
 
-      if (!supported && this.player.y <= 0) this.die();
-      else if (this.world.collides(this.player.hitbox())) this.die();
-    } else {
+      if (dead) this.die();
+    } else if (this.state !== 'paused') {
+      // idle / dead: the dino may still settle or fall, but a paused game is fully frozen (BUG-001)
       if (this.state === 'dead') this.deadT += dt;
       const supported = this.world.supported();
       this.player.update(dt, this.input, 0, supported, false);
@@ -263,7 +285,8 @@ export class Game {
   // ---------------- mode ----------------
   private loadHi() {
     this.hi = 0;
-    try { this.hi = parseInt(localStorage.getItem(hiKeyFor(this.rules.mode)) ?? '0', 10) || 0; } catch { /* private mode */ }
+    // a corrupt / negative stored value falls back to 0 (BUG-007)
+    try { this.hi = Math.max(0, parseInt(localStorage.getItem(hiKeyFor(this.rules.mode)) ?? '0', 10) || 0); } catch { /* private mode */ }
   }
 
   /** EASY <-> HARD. Only between runs. */

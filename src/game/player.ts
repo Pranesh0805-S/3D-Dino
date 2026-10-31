@@ -99,10 +99,12 @@ export class Player {
       this.ducking = running && inp.down && this.grounded;
     }
 
-    // vertical physics
-    this.vy -= CFG.gravity * dt;
-    if (!this.grounded && !this.dead && inp.down && this.vy < 0) this.vy -= CFG.fastFall * dt;
-    this.y += this.vy * dt;
+    // vertical physics: exact constant-acceleration step (y += v*dt - a*dt^2/2), so jump
+    // height and air time do not depend on the frame rate (BUG-002)
+    const fastFall = !this.grounded && !this.dead && inp.down && this.vy < 0;
+    const a = CFG.gravity + (fastFall ? CFG.fastFall : 0);
+    this.y += this.vy * dt - 0.5 * a * dt * dt;
+    this.vy -= a * dt;
 
     if (this.y <= 0 && prevY >= -0.01 && supported && this.vy <= 0) {
       this.y = 0;
